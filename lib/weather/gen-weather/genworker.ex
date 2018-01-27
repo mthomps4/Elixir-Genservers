@@ -4,7 +4,15 @@ defmodule Genweather.Worker do
   def start_link(opts \\ []) do
     GenServer.start_link(__MODULE__, :ok, opts)
   end
-
+  def get_stats(pid) do
+    GenServer.call(pid, :get_stats)
+  end
+  def reset_stats(pid) do
+    GenServer.cast(pid, :reset_stats)
+  end
+  def stop(pid) do
+    GenServer.cast(pid, :stop)
+  end
   def get_temperature(pid, location) do
     GenServer.call(pid, {:location, location})
   end
@@ -21,6 +29,27 @@ defmodule Genweather.Worker do
         {:reply, "#{temp}C", new_stats}
       _any -> {:reply, :error, stats}
     end
+  end
+  def handle_call(:get_stats, _from, stats) do
+    # Not modifying stats just passing along.
+    {:reply, stats, stats}
+  end
+  def handle_cast(:reset_stats, _stats) do
+    {:noreply, %{}}
+  end
+  def handle_cast(:stop, stats) do
+    {:stop, :normal, stats}
+  end
+  # Handle Info is used for any call to pid that's not handled by cast or call
+  def handle_info(msg, stats) do
+    IO.puts "received #{inspect msg}"
+    {:noreply, stats}
+  end
+  def terminate(reason, stats) do
+    # We could write to a file, DB, etc
+    IO.puts "server terminated because of #{inspect reason}"
+      inspect stats
+    :ok
   end
   ## Helper Functions 
   defp temperature_of(location) do
