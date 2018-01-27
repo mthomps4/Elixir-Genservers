@@ -1,7 +1,14 @@
 defmodule Genweather.Worker do
   use GenServer
+  # Local Naming 
+  #@name WW
+  # I can replace pid with @name below 
+  # I no longer have to catch pid but could for safty.
+
   ## Client API 
   def start_link(opts \\ []) do
+    # Local Naming --
+    # GenServer.start_link(__MODULE__, :ok, opts ++ [name: MW])
     GenServer.start_link(__MODULE__, :ok, opts)
   end
   def get_stats(pid) do
